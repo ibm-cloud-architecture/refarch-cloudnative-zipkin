@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{  .Chart.Name }}-zipkin-server
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    component: zipkin-server
+spec:
+  replicas:  {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  template:
+    metadata:
+      labels:
+        component: zipkin-server
+    spec:
+      containers:
+      - name: zipkin-server
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.internalPort }}
+          initialDelaySeconds: 20
+        volumeMounts:
+        - mountPath: /config
+          name: zipkin-server-config
+      volumes:
+      - name: zipkin-server-config
+        configMap:
+{{ if .Values.config.existingConfigMapName }}
+          name: {{ .Values.config.existingConfigMapName }}
+{{ else }}
+          name: {{ .Release.Name }}-{{ .Chart.Name }}-zipkin-server
+{{ end }}

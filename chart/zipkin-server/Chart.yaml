@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Zipkin Server
+name: zipkin-server
+version: 1.0.0

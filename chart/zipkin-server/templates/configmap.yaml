@@ -1,0 +1,33 @@
+{{ if .Values.config.existingConfigMapName }}
+{{ else }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-zipkin-server
+  labels:
+    component: zipkin-server
+data:
+  bootstrap.yaml: |+
+    server:
+      port: {{ .Values.service.internalPort }}
+    spring:
+      application:
+        name: zipkin-server
+      cloud:
+        config:
+{{ if .Values.spring.cloud.config.enabled }}
+          enabled: {{ .Values.spring.cloud.config.enabled }}
+          uri: {{ required "A valid value of spring.cloud.config.uri is required!" .Values.spring.cloud.config.uri }}
+{{ else }}
+          enabled: false
+{{ end }}
+  application.yaml: |+
+    zipkin:
+      instance:
+        hostname: {{ .Values.service.name }}
+      client:
+        registerWithzipkin: false
+        fetchRegistry: false
+        serviceUrl:
+          defaultZone: http://${zipkin.instance.hostname}:${server.port}/zipkin/
+{{ end }}
