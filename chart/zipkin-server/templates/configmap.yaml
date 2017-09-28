@@ -3,8 +3,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-{{ .Chart.Name }}-zipkin-server
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
   labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
     component: zipkin-server
 data:
   bootstrap.yaml: |+
@@ -22,12 +25,12 @@ data:
           enabled: false
 {{ end }}
   application.yaml: |+
-    zipkin:
+    eureka:
       instance:
-        hostname: {{ .Values.service.name }}
+        preferIpAddress: true
       client:
-        registerWithzipkin: false
-        fetchRegistry: false
+        registerWithEureka: true
+        fetchRegistry: true
         serviceUrl:
-          defaultZone: http://${zipkin.instance.hostname}:${server.port}/zipkin/
+          defaultZone: {{ .Values.eureka.client.serviceUrl.defaultZone }}
 {{ end }}
