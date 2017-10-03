@@ -1,4 +1,5 @@
-{{ if .Values.config.existingConfigMapName }}
+{{ if .Values.global.useConfigServerBootstrap }}
+{{ else if .Values.config.existingConfigMapName }}
 {{ else }}
 apiVersion: v1
 kind: ConfigMap
